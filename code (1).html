@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BINiBOT - Waste Sorting Game</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0fdf4; /* Light green background */
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    h1 {
+      color: #166534; /* Dark green */
+      margin-bottom: 10px;
+    }
+    p {
+      color: #3f3f46;
+      margin-bottom: 30px;
+    }
+    .score {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #166534;
+      margin-bottom: 20px;
+    }
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .bins-container {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .bin {
+      width: 140px;
+      height: 170px;
+      border: 3px dashed #ccc;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding: 10px;
+      background-color: #fff;
+    }
+    .bin p {
+      margin: 5px 0;
+      font-weight: bold;
+    }
+    #bio-bin {
+      border-color: #22c55e;
+    } /* Green for Bio */
+    #nonbio-bin {
+      border-color: #ef4444;
+    } /* Red for Non-Bio */
+    .trash-items {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .trash-item {
+      width: 80px;
+      height: 80px;
+      cursor: grab;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .trash-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+    .trash-item.dragging {
+      opacity: 0.5;
+    }
+    .message {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      display: none;
+    }
+    .success {
+      background-color: #bbf7d0; /* Light green */
+      color: #166534;
+      display: block;
+    }
+    .try-again {
+      background-color: #fecaca; /* Light red */
+      color: #dc2626;
+      display: block;
+    }
+    .reset-btn {
+      margin-top: 25px;
+      padding: 12px 25px;
+      background-color: #166534;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .reset-btn:hover {
+      background-color: #15803d;
+    }
+    @media (max-width: 600px) {
+      .bin {
+        width: 120px;
+        height: 150px;
+      }
+      .trash-item {
+        width: 70px;
+        height: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>BINiBOT Waste Sorting Game</h1>
+  <p>Drag the trash items to the correct bin! Learn how to sort properly.</p>
+
+  <div class="score">Score: <span id="score-value">0</span></div>
+
+  <div class="game-container">
+    <div class="bins-container">
+      <div
+        class="bin"
+        id="bio-bin"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
+        <p>BIO</p>
+        <p>Biodegradable</p>
+      </div>
+      <div
+        class="bin"
+        id="nonbio-bin"
+        ondrop="drop(event)"
+        ondragover="allowDrop(event)"
+      >
+        <p>NON-BIO</p>
+        <p>Non-Biodegradable</p>
+      </div>
+    </div>
+
+    <div class="trash-items" id="trash-container">
+      <!-- Banana Peel -->
+      <div
+        class="trash-item"
+        draggable="true"
+        ondragstart="drag(event)"
+        id="banana"
+        data-type="bio"
+        title="Banana Peel"
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg"
+          alt="Banana Peel"
+        />
+      </div>
+      <!-- Plastic Bottle -->
+      <div
+        class="trash-item"
+        draggable="true"
+        ondragstart="drag(event)"
+        id="bottle"
+        data-type="nonbio"
+        title="Plastic Bottle"
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/0/0e/Plastic_bottle.jpg"
+          alt="Plastic Bottle"
+        />
+      </div>
+      <!-- Apple Core -->
+      <div
+        class="trash-item"
+        draggable="true"
+        ondragstart="drag(event)"
+        id="apple"
+        data-type="bio"
+        title="Apple Core"
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Apple_core.jpg"
+          alt="Apple Core"
+        />
+      </div>
+      <!-- Candy Wrapper -->
+      <div
+        class="trash-item"
+        draggable="true"
+        ondragstart="drag(event)"
+        id="wrapper"
+        data-type="nonbio"
+        title="Candy Wrapper"
+      >
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Candy_wrapper.jpg"
+          alt="Candy Wrapper"
+        />
+      </div>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <button class="reset-btn" onclick="resetGame()">Play Again</button>
+  </div>
+
+  <script>
+    let score = 0;
+    const totalItems = 4; // Number of trash items
+
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+
+    function drag(ev) {
+      ev.dataTransfer.setData('text', ev.target.id);
+    }
+
+    function drop(ev) {
+      ev.preventDefault();
+      const data = ev.dataTransfer.getData('text');
+      const draggedElement = document.getElementById(data);
+      const itemType = draggedElement.getAttribute('data-type');
+      const binId = ev.currentTarget.id;
+
+      // Check if the drop is correct
+      if (
+        (binId === 'bio-bin' && itemType === 'bio') ||
+        (binId === 'nonbio-bin' && itemType === 'nonbio')
+      ) {
+        // Correct bin!
+        ev.currentTarget.appendChild(draggedElement);
+        draggedElement.style.cursor = 'default';
+        draggedElement.draggable = false;
+        showMessage('Correct!', 'success');
+        updateScore();
+      } else {
+        // Wrong bin
+        showMessage('Try again!', 'try-again');
+      }
+    }
+
+    function updateScore() {
+      score++;
+      document.getElementById('score-value').textContent = score;
+
+      // Check if all items are sorted
+      if (score === totalItems) {
+        showMessage(
+          '🎉 Congratulations! You sorted all the trash correctly!',
+          'success'
+        );
+      }
+    }
+
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = 'message ' + type;
+      messageDiv.style.display = 'block';
+
+      // Hide message after 2 seconds
+      setTimeout(() => {
+        messageDiv.style.display = 'none';
+      }, 2000);
+    }
+
+    function resetGame() {
+      // Reset score
+      score = 0;
+      document.getElementById('score-value').textContent = score;
+
+      // Reset all trash items
+      const trashContainer = document.getElementById('trash-container');
+      const items = document.querySelectorAll('.trash-item');
+
+      items.forEach((item) => {
+        trashContainer.appendChild(item);
+        item.style.cursor = 'grab';
+        item.draggable = true;
+      });
+
+      // Hide any message
+      document.getElementById('message').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
